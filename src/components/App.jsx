@@ -6,7 +6,7 @@ import Button from './Button/Button';
 import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
 
-const App = () => {
+function App() {
   const [query, setQuery] = useState('');
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
@@ -14,19 +14,6 @@ const App = () => {
   const [showModal, setShowModal] = useState(false);
   const [selectedImage, setSelectedImage] = useState('');
   const [showLoadMore, setShowLoadMore] = useState(false);
-
-  useEffect(() => {
-    if (query !== '') {
-      setImages([]);
-      setPage(1);
-      setShowLoadMore(false);
-      fetchImages();
-    }
-  }, [query]);
-
-  const handleSearch = (query) => {
-    setQuery(query);
-  };
 
   const fetchImages = () => {
     setIsLoading(true);
@@ -54,18 +41,31 @@ const App = () => {
       });
   };
 
+  useEffect(() => {
+    if (query !== '') {
+      setImages([]);
+      setPage(1);
+      setShowLoadMore(false);
+      fetchImages();
+    }
+  }, [query, fetchImages]); // Включите fetchImages в массив зависимостей
+
+  const handleSearch = (newQuery) => {
+    setQuery(newQuery);
+  };
+
   const handleLoadMore = () => {
     fetchImages();
   };
 
   const handleOpenModal = (image) => {
-    setShowModal(true);
     setSelectedImage(image);
+    setShowModal(true);
   };
 
   const handleCloseModal = () => {
-    setShowModal(false);
     setSelectedImage('');
+    setShowModal(false);
   };
 
   return (
@@ -77,7 +77,6 @@ const App = () => {
       {showModal && <Modal src={selectedImage} alt="Selected Image" onClose={handleCloseModal} />}
     </div>
   );
-};
+}
 
 export default App;
-
