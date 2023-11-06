@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useCallback } from 'react';
 import axios from 'axios';
 import Searchbar from './Searchbar/Searchbar';
 import ImageGallery from './ImageGallery/ImageGallery';
@@ -6,7 +6,7 @@ import Button from './Button/Button';
 import Loader from './Loader/Loader';
 import Modal from './Modal/Modal';
 
-function App() {
+const App = () => {
   const [query, setQuery] = useState('');
   const [images, setImages] = useState([]);
   const [page, setPage] = useState(1);
@@ -15,7 +15,7 @@ function App() {
   const [selectedImage, setSelectedImage] = useState('');
   const [showLoadMore, setShowLoadMore] = useState(false);
 
-  const fetchImages = () => {
+  const fetchImages = useCallback(() => {
     setIsLoading(true);
 
     const apiKey = '39292315-4a49a35cd99dea9ef99c54ebb';
@@ -39,19 +39,10 @@ function App() {
         console.error('Error fetching images:', error);
         setIsLoading(false);
       });
-  };
+  }, [query, page]);
 
-  useEffect(() => {
-    if (query !== '') {
-      setImages([]);
-      setPage(1);
-      setShowLoadMore(false);
-      fetchImages();
-    }
-  }, [query, fetchImages]); // Включите fetchImages в массив зависимостей
-
-  const handleSearch = (newQuery) => {
-    setQuery(newQuery);
+  const handleSearch = (query) => {
+    setQuery(query);
   };
 
   const handleLoadMore = () => {
@@ -59,14 +50,23 @@ function App() {
   };
 
   const handleOpenModal = (image) => {
-    setSelectedImage(image);
     setShowModal(true);
+    setSelectedImage(image);
   };
 
   const handleCloseModal = () => {
-    setSelectedImage('');
     setShowModal(false);
+    setSelectedImage('');
   };
+
+  useEffect(() => {
+    if (query) {
+      setImages([]);
+      setPage(1);
+      setShowLoadMore(false);
+      fetchImages();
+    }
+  }, [query, fetchImages]);
 
   return (
     <div className="App">
@@ -77,6 +77,6 @@ function App() {
       {showModal && <Modal src={selectedImage} alt="Selected Image" onClose={handleCloseModal} />}
     </div>
   );
-}
+};
 
 export default App;
