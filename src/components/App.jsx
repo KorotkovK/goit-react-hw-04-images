@@ -27,7 +27,6 @@ const App = () => {
       .then((response) => {
         if (response.data.hits.length > 0) {
           setImages((prevImages) => [...prevImages, ...response.data.hits]);
-          setPage((prevPage) => prevPage + 1);
           setIsLoading(false);
           setShowLoadMore(true);
         } else {
@@ -41,12 +40,23 @@ const App = () => {
       });
   }, [query, page]);
 
-  const handleSearch = (query) => {
-    setQuery(query);
+  useEffect(() => {
+    if (query.trim() === '') {
+      return;
+    }
+
+    fetchImages();
+  }, [query, fetchImages]);
+
+  const handleSearch = (newQuery) => {
+    setQuery(newQuery);
+    setImages([]);
+    setPage(1);
+    setShowLoadMore(false);
   };
 
   const handleLoadMore = () => {
-    fetchImages();
+    setPage((prevPage) => prevPage + 1);
   };
 
   const handleOpenModal = (image) => {
@@ -59,21 +69,14 @@ const App = () => {
     setSelectedImage('');
   };
 
-  useEffect(() => {
-    if (query) {
-      setImages([]);
-      setPage(1);
-      setShowLoadMore(false);
-      fetchImages();
-    }
-  }, [query, fetchImages]);
-
   return (
     <div className="App">
       <Searchbar onSubmit={handleSearch} />
-      <ImageGallery images={images} onImageClick={handleOpenModal} />
+      {query && <ImageGallery images={images} onImageClick={handleOpenModal} />}
       {isLoading && <Loader type="Puff" color="#00BFFF" height={100} width={100} />}
-      {showLoadMore && images.length > 0 && !isLoading && <Button onClick={handleLoadMore} />}
+      {showLoadMore && images.length > 0 && !isLoading && (
+        <Button onClick={handleLoadMore}>Load More</Button>
+      )}
       {showModal && <Modal src={selectedImage} alt="Selected Image" onClose={handleCloseModal} />}
     </div>
   );
